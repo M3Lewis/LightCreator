@@ -1,0 +1,11 @@
+F:\VisualStudioGrasshopper\LightCreator\bin\Debug\net48\LightCreator.gha
+F:\VisualStudioGrasshopper\LightCreator\bin\Debug\net48\LightCreator.pdb
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.csproj.AssemblyReference.cache
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.GeneratedMSBuildEditorConfig.editorconfig
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.AssemblyInfoInputs.cache
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.AssemblyInfo.cs
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.csproj.CoreCompileInputs.cache
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.gha
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.pdb
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.Properties.Resource.resources
+F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.csproj.GenerateResource.cache

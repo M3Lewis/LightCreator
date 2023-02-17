@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "rJvEw26PwX1ixGc8oLrJyV0wLlxzeiN/HT3t2+7e6oOG+IvoD1mwivD4KP3+OPUCM4seUqGmrQephTZQ+lX2FA==",
+  "success": true,
+  "projectFilePath": "F:\\VisualStudioGrasshopper\\LightCreator\\LightCreator.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\M3\\.nuget\\packages\\grasshopper\\7.13.21348.13001\\grasshopper.7.13.21348.13001.nupkg.sha512",
+    "C:\\Users\\M3\\.nuget\\packages\\rhinocommon\\7.13.21348.13001\\rhinocommon.7.13.21348.13001.nupkg.sha512"
+  ],
+  "logs": []
+}
