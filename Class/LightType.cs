@@ -1,6 +1,7 @@
 ﻿using Eto.Drawing;
 using Grasshopper.Kernel.Types;
 using Rhino;
+using Rhino.Commands;
 using Rhino.DocObjects;
 using Rhino.Geometry;
 using Rhino.Render.ChangeQueue;
@@ -10,6 +11,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rhino.Input.Custom;
 
 namespace LightCreator.Class
 {
@@ -21,6 +23,7 @@ namespace LightCreator.Class
         {
             Run = run;
             TypeNum = typeNum;
+
         }
         public List<string> SelectLightByType()
         {
@@ -70,6 +73,7 @@ namespace LightCreator.Class
 
                                 theGuids.Add(rhinoObject.Id);
                                 doc.Objects.Select(theGuids);
+                                
                             }
                             break;
                         case 1:
@@ -79,6 +83,7 @@ namespace LightCreator.Class
 
                                 theGuids.Add(rhinoObject.Id);
                                 doc.Objects.Select(theGuids);
+                             
                             }
                             break;
                         case 2:
@@ -88,6 +93,7 @@ namespace LightCreator.Class
 
                                 theGuids.Add(rhinoObject.Id);
                                 doc.Objects.Select(theGuids);
+                            
                             }
                             break;
                         case 3:
@@ -97,6 +103,7 @@ namespace LightCreator.Class
 
                                 theGuids.Add(rhinoObject.Id);
                                 doc.Objects.Select(theGuids);
+                           
                             }
                             break;
                         case 4:
@@ -106,10 +113,13 @@ namespace LightCreator.Class
 
                                 theGuids.Add(rhinoObject.Id);
                                 doc.Objects.Select(theGuids);
+                       
                             }
                             break;
                     }
+                   
                 }
+                
             }
             List<string> guidList = new List<string>();
             for (int i = 0; i < theGuids.Count; i++)
@@ -117,6 +127,7 @@ namespace LightCreator.Class
                 guidList.Add(theGuids[i].ToString());
             }
             return guidList;
+
         }
     }
 }

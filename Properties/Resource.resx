@@ -124,7 +124,10 @@
   <data name="PointLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\PointLight.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="RectLight" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="RectLightFitSrf" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\RectLightFitSrf.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RectLightOnSrf" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\RectLight.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SelectLightByType" type="System.Resources.ResXFileRef, System.Windows.Forms">

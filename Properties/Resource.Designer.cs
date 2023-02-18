@@ -83,9 +83,19 @@ namespace LightCreator.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap RectLight {
+        internal static System.Drawing.Bitmap RectLightFitSrf {
             get {
-                object obj = ResourceManager.GetObject("RectLight", resourceCulture);
+                object obj = ResourceManager.GetObject("RectLightFitSrf", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap RectLightOnSrf {
+            get {
+                object obj = ResourceManager.GetObject("RectLightOnSrf", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
