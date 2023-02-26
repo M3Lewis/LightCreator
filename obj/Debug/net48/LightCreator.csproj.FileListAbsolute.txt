@@ -9,3 +9,14 @@ F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.gha
 F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.pdb
 F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.Properties.Resource.resources
 F:\VisualStudioGrasshopper\LightCreator\obj\Debug\net48\LightCreator.csproj.GenerateResource.cache
+F:\VisualStudioGrasshopper\LightCreatorOrigin\bin\Debug\net48\LightCreator.gha
+F:\VisualStudioGrasshopper\LightCreatorOrigin\bin\Debug\net48\LightCreator.pdb
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.csproj.AssemblyReference.cache
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.Properties.Resource.resources
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.csproj.GenerateResource.cache
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.GeneratedMSBuildEditorConfig.editorconfig
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.AssemblyInfoInputs.cache
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.AssemblyInfo.cs
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.csproj.CoreCompileInputs.cache
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.gha
+F:\VisualStudioGrasshopper\LightCreatorOrigin\obj\Debug\net48\LightCreator.pdb

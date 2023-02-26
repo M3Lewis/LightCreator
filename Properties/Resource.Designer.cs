@@ -63,9 +63,29 @@ namespace LightCreator.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap LightCreator {
+        internal static System.Drawing.Bitmap EditLight {
             get {
-                object obj = ResourceManager.GetObject("LightCreator", resourceCulture);
+                object obj = ResourceManager.GetObject("EditLight", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap LC {
+            get {
+                object obj = ResourceManager.GetObject("LC", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap LightDividePts {
+            get {
+                object obj = ResourceManager.GetObject("LightDividePts", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +113,9 @@ namespace LightCreator.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap RectLightOnSrf {
+        internal static System.Drawing.Bitmap RectLightOnSrfAlongCrv {
             get {
-                object obj = ResourceManager.GetObject("RectLightOnSrf", resourceCulture);
+                object obj = ResourceManager.GetObject("RectLightOnSrfAlongCrv", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +123,29 @@ namespace LightCreator.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
-        internal static System.Drawing.Bitmap SelectLightByType {
+        internal static System.Drawing.Bitmap SelectLight {
             get {
-                object obj = ResourceManager.GetObject("SelectLightByType", resourceCulture);
+                object obj = ResourceManager.GetObject("SelectLight", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap SpotLight {
+            get {
+                object obj = ResourceManager.GetObject("SpotLight", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap SpotLightAlongLine {
+            get {
+                object obj = ResourceManager.GetObject("SpotLightAlongLine", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

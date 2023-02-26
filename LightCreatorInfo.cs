@@ -11,7 +11,7 @@ namespace LightCreator
         public override string Name => "LightCreator";
 
         //Return a 24x24 pixel bitmap to represent this GHA library.
-        public override Bitmap Icon => Properties.Resource.LightCreator;
+        public override Bitmap Icon => Properties.Resource.LC;
 
         //Return a short string describing the purpose of this GHA library.
         public override string Description => "";
