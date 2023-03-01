@@ -1,4 +1,4 @@
-﻿using Eto.Drawing;
+﻿
 using Grasshopper.Kernel.Types;
 using Rhino;
 using Rhino.Commands;

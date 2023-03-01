@@ -1,5 +1,6 @@
-﻿using Eto.Drawing;
+﻿
 using Eto.Forms;
+using Grasshopper.Kernel;
 using Rhino;
 using Rhino.Geometry;
 using Rhino.Render.ChangeQueue;
@@ -28,11 +29,11 @@ namespace LightCreator.Class
         public double LightWidth;
         public double LightOffsetDist;
         public double LightIntensity;
-        public System.Drawing.Color LightColor;
+        public List<Color> LightColor;
         public double SpotLightAngle;
 
         //SpotLight_CreateOnCrv Overload
-        public SpotLight(bool run, Curve baseCrv, int lightMode, bool countMode, int divideCount, double divideLength, double lightLength, double lightIntensity, System.Drawing.Color lightColor, double spotLightAngle)
+        public SpotLight(bool run, Curve baseCrv, int lightMode, bool countMode, int divideCount, double divideLength, double lightLength, double lightIntensity, List<Color> lightColor, double spotLightAngle)
         {
             Run = run;
             BaseCrv = baseCrv;
@@ -60,14 +61,14 @@ namespace LightCreator.Class
 
             if (spotLightAngle < 1)
             { SpotLightAngle = 1; }
-            if (spotLightAngle >= 90)
+            else if (spotLightAngle >= 90)
             { spotLightAngle = 89; }
             else { SpotLightAngle = spotLightAngle; }
 
         }
 
         //SpotLight_CreateAlongLine Overload
-        public SpotLight(bool run, List<Line> baseLine, double spotLightAngle, double lightIntensity, System.Drawing.Color lightColor)
+        public SpotLight(bool run, List<Line> baseLine, double spotLightAngle, double lightIntensity, List<Color> lightColor)
         {
             Run = run;
             BaseLine = baseLine;
@@ -84,7 +85,7 @@ namespace LightCreator.Class
         //SpotLight_CreateOnCrv_Value
         double[] DivideParam = null;
         List<Curve> SplitedCrvs = new List<Curve>();
-        List<Plane> PlnList = new List<Plane>();
+        public List<Plane> PlnList = new List<Plane>();
         List<double> ParamList = new List<double>();
         List<Rhino.Geometry.Light> lights = new List<Rhino.Geometry.Light>();
 
@@ -127,17 +128,9 @@ namespace LightCreator.Class
             {
                 Plane tempPln;
                 BaseCrv.FrameAt(ParamList[i], out tempPln);
+                Vector3d fineTunedYAxis = Vector3d.CrossProduct(tempPln.XAxis, Plane.WorldXY.ZAxis);
+                tempPln = new Plane(tempPln.Origin, tempPln.XAxis, fineTunedYAxis);
 
-                //旋转平面
-                if (Vector3d.Multiply(tempPln.Normal, Plane.WorldXY.ZAxis) == 1)
-                {
-                    tempPln.Flip();
-                    tempPln.Rotate(RhinoMath.ToRadians(SpotLightAngle + 90), tempPln.ZAxis, tempPln.Origin);
-                }
-                else
-                {
-                    tempPln.Rotate(RhinoMath.ToRadians(SpotLightAngle), tempPln.ZAxis, tempPln.Origin);
-                }
                 PlnList.Add(tempPln);
             }
             return PlnList;
@@ -150,7 +143,14 @@ namespace LightCreator.Class
                 lights.Add(li);
                 lights[i].LightStyle = LightStyle.WorldSpot;
                 lights[i].Intensity = LightIntensity / 100;
-                lights[i].Diffuse = LightColor;
+                if (LightColor.Count > 1)
+                {
+                    lights[i].Diffuse = LightColor[i];
+                }
+                else
+                {
+                    lights[i].Diffuse = LightColor[0];
+                }
                 lights[i].Direction = PlnList[i].ZAxis * LightLength;
                 lights[i].Location = PlnList[i].Origin;
                 lights[i].SpotAngleRadians = RhinoMath.ToRadians(SpotLightAngle);
@@ -168,7 +168,14 @@ namespace LightCreator.Class
                 lights[i].Direction = BaseLine[i].To - BaseLine[i].From;
                 lights[i].SpotAngleRadians = SpotLightAngle * Math.PI / 180;
                 lights[i].Intensity = LightIntensity / 100;
-                lights[i].Diffuse = LightColor;
+                if (LightColor.Count > 1)
+                {
+                    lights[i].Diffuse = LightColor[i];
+                }
+                else
+                {
+                    lights[i].Diffuse = LightColor[0];
+                }
             }
         }
         public void CreateSpotLight()
@@ -216,5 +223,7 @@ namespace LightCreator.Class
             }
             return spotLightPreviewMesh;
         }
+
+        
     }
 }

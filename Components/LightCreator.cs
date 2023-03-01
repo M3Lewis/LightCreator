@@ -29,7 +29,16 @@ namespace LightCreator
             pManager.AddNumberParameter("lightWidth", "lightWidth", "Width of Rectangular Light | 矩形灯宽度", GH_ParamAccess.item, 0.2);
             pManager.AddNumberParameter("offsetDist", "offsetDist", "Distance From Light to Surface |灯光到基准面偏移距离", GH_ParamAccess.item, 0);
             pManager.AddNumberParameter("intensity", "intensity", "Light Intensity | 灯光亮度", GH_ParamAccess.item, 100);
-            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.item, Color.White);
+            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.list, Color.White);
+        }
+
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            SolutionExpired += (sender, args) => {
+                ((GH_Component)sender).Params.Input[1].DataMapping = GH_DataMapping.Flatten;
+                ((GH_Component)sender).Params.Input[2].DataMapping = GH_DataMapping.Flatten;
+            };
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -49,7 +58,7 @@ namespace LightCreator
             double iLightWidth = 0.2;
             double iOffsetDist = 0.2;
             double iIntensity = 100;
-            Color iColor = Color.White;
+            List<Color> iColor = new List<Color>();
 
             DA.GetData("run", ref iRun);
             DA.GetData("srf", ref iSrf);
@@ -58,11 +67,15 @@ namespace LightCreator
             DA.GetData("lightWidth", ref iLightWidth);
             DA.GetData("offsetDist", ref iOffsetDist);
             DA.GetData("intensity", ref iIntensity);
-            DA.GetData("color", ref iColor);
+            DA.GetDataList("color", iColor);
 
             RectLight rectLight = new RectLight(iRun, iSrf, iCrv, iLightLength, iLightWidth, iOffsetDist, iIntensity, iColor);
             rectLight.CreateOnSrfAlongCrv_DivideCurve();
             rectLight.CreateOnSrfAlongCrv_AdjustPlane();
+            if (rectLight.PlnList.Count != iColor.Count&&iColor.Count>1)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Color's Count is not equal to Light's Count | 颜色数量和灯光数量不匹配");
+            }
             rectLight.CreateOnSrfAlongCrv_DefineLightGeometry();
             DA.SetDataList("PreviewCrvs", rectLight.CreateOnSrfAlongCrv_GetRectLightPreviewCrvs());
             rectLight.CreateRectLight();
@@ -87,9 +100,17 @@ namespace LightCreator
         protected override void RegisterInputParams(GH_Component.GH_InputParamManager pManager)
         {
             pManager.AddBooleanParameter("run", "run", "Button | 按钮", GH_ParamAccess.item, false);
-            pManager.AddSurfaceParameter("srf", "srf", "Base Surface | 基准面", GH_ParamAccess.item);
+            pManager.AddSurfaceParameter("srf", "srf", "Base Surface | 基准面", GH_ParamAccess.list);
             pManager.AddNumberParameter("intensity", "intensity", "Light Intensity | 灯光亮度", GH_ParamAccess.item, 100);
-            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.item, Color.White);
+            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.list, Color.White);
+        }
+
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            SolutionExpired += (sender, args) => {
+                ((GH_Component)sender).Params.Input[1].DataMapping = GH_DataMapping.Flatten;
+            };
         }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
@@ -100,17 +121,22 @@ namespace LightCreator
         protected override void SolveInstance(IGH_DataAccess DA)
         {
             bool iRun = false;
-            Surface iSrf = null;
+            List<Surface> iSrf = new List<Surface>();
             double iIntensity = 100;
-            Color iColor = Color.White;
+            List<Color> iColor = new List<Color>();
 
             DA.GetData("run", ref iRun);
-            DA.GetData("srf", ref iSrf);
+            DA.GetDataList("srf", iSrf);
             DA.GetData("intensity", ref iIntensity);
-            DA.GetData("color", ref iColor);
+            DA.GetDataList("color", iColor);
 
             RectLight rectLight = new RectLight(iRun, iSrf, iIntensity, iColor);
+            if (rectLight.BaseSrfList.Count != iColor.Count && iColor.Count > 1)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Color's Count is not equal to Light's Count | 颜色数量和灯光数量不匹配");
+            }
             rectLight.CreateFitPlaneSrf_DefineGeometry();
+
             DA.SetDataList("PreviewRect", rectLight.CreateFitPlaneSrf_GetRectLightPreviewCrvs());
             rectLight.CreateRectLight();
         }
@@ -137,11 +163,16 @@ namespace LightCreator
             pManager.AddBooleanParameter("run", "run", "Button | 按钮", GH_ParamAccess.item, false);
             pManager.AddPointParameter("point", "point", "Base point of PointLight | 球形灯基点位置", GH_ParamAccess.list, Plane.WorldXY.Origin);
             pManager.AddNumberParameter("intensity", "intensity", "Light Intensity | 灯光亮度", GH_ParamAccess.item, 100);
-            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.item, Color.White);
+            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.list, Color.White);
             pManager.AddNumberParameter("previewRadius", "previewRadius", "Point Light Preview Radius | 球形灯预览半径", GH_ParamAccess.item, 1);
         }
-
-
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            SolutionExpired += (sender, args) => {
+                ((GH_Component)sender).Params.Input[1].DataMapping = GH_DataMapping.Flatten;
+            };
+        }
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddMeshParameter("previewMesh", "previewMesh", "previewMesh", GH_ParamAccess.list);
@@ -152,16 +183,20 @@ namespace LightCreator
             bool iRun = false;
             List<Point3d> iLocation = new List<Point3d>();
             double iIntensity = 100;
-            Color iColor = Color.White;
+            List<Color> iColor = new List<Color>();
             double iPreviewRadius = 1;
 
             DA.GetData("run", ref iRun);
             DA.GetDataList("point", iLocation);
             DA.GetData("intensity", ref iIntensity);
-            DA.GetData("color", ref iColor);
+            DA.GetDataList("color", iColor);
             DA.GetData("previewRadius", ref iPreviewRadius);
 
             PointLight ptLight = new PointLight(iRun, iLocation, iIntensity, iColor, iPreviewRadius);
+            if (ptLight.Location.Count != iColor.Count && iColor.Count > 1)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Color's Count is not equal to Light's Count | 颜色数量和灯光数量不匹配");
+            }
             ptLight.Default_DefinePointLightGeometry();
             DA.SetDataList("previewMesh", ptLight.Default_GetPointLightPreviewMesh());
             ptLight.CreatePointLight();
@@ -187,9 +222,16 @@ namespace LightCreator
             pManager.AddLineParameter("line", "line", "Base direction line of SpotLight | 聚光灯方向线", GH_ParamAccess.list);
             pManager.AddNumberParameter("spotLightAngle", "spotLightAngle", "SpotLight Beam Angle.NOTICE:PLEASE INPUT A NUMBER LARGER THAN 0 AND SMALLER THAN 90. | 聚光灯光束角.注意：请输入0-90之间的数值。", GH_ParamAccess.item, 30);
             pManager.AddNumberParameter("intensity", "intensity", "Light Intensity | 灯光亮度", GH_ParamAccess.item, 100);
-            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.item, Color.White);
+            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.list, Color.White);
+            
         }
-
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            SolutionExpired += (sender, args) => {
+                ((GH_Component)sender).Params.Input[1].DataMapping = GH_DataMapping.Flatten;
+            };
+        }
 
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
@@ -202,15 +244,19 @@ namespace LightCreator
             List<Line> iLine = new List<Line>();
             double iSpotLightAngle = 30;
             double iIntensity = 100;
-            Color iColor = Color.White;
+            List<Color> iColor = new List<Color>();
 
             DA.GetData("run", ref iRun);
             DA.GetDataList("line", iLine);
             DA.GetData("spotLightAngle", ref iSpotLightAngle);
             DA.GetData("intensity", ref iIntensity);
-            DA.GetData("color", ref iColor);
+            DA.GetDataList("color", iColor);
 
             SpotLight spotLight = new SpotLight(iRun, iLine, iSpotLightAngle, iIntensity, iColor);
+            if (spotLight.BaseLine.Count != iColor.Count && iColor.Count > 1)
+            {
+                this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Color's Count is not equal to Light's Count | 颜色数量和灯光数量不匹配");
+            }
             spotLight.CreateAlongLine_DefineSpotLightGeometry();
             DA.SetDataList("PreviewCone", spotLight.CreateAlongLine_GetSpotLightPreviewMesh());
             spotLight.CreateSpotLight();
@@ -276,7 +322,7 @@ namespace LightCreator
             pManager.AddNumberParameter("lightLength", "lightLength", "Length of Rectangular Light | 矩形灯长度", GH_ParamAccess.item, 3);
             pManager.AddNumberParameter("lightWidth", "lightWidth", "Width of Rectangular Light | 矩形灯宽度", GH_ParamAccess.item, 0.2);
             pManager.AddNumberParameter("intensity", "intensity", "Light Intensity | 灯光亮度", GH_ParamAccess.item, 100);
-            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.item, Color.White);
+            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.list, Color.White);
             pManager.AddBooleanParameter("isRandomColor", "isRandomColor", "LightObject's color is Random Color | 灯光随机颜色", GH_ParamAccess.item, false);
             pManager.AddNumberParameter("rotateAngle", "rotateAngle", "Light Rotation Angle after click run button.| 按下按钮后，灯光单次旋转角度", GH_ParamAccess.item, 0);
             pManager.AddNumberParameter("spotLightAngle", "spotLightAngle", "When input Light Object are SpotLight,it changes SpotLight angle.| 当输入灯光为聚光灯时,修改聚光灯角度", GH_ParamAccess.item, 0);
@@ -295,24 +341,22 @@ namespace LightCreator
             double iLightLength = double.NaN;
             double iLightWidth = double.NaN;
             double iIntensity = 100;
-            System.Drawing.Color iLightColor = Color.White;
+            List<Color> iColor = new List<Color>();
             bool iIsRandomColor = false;
             double iRotateAngle = 0;
             double iSpotLightAngle = 0;
-            Vector3d v1 = Plane.WorldXY.XAxis;
-            Vector3d v2 = Plane.WorldXY.YAxis;
 
             DA.GetData("run", ref iRun);
             DA.GetDataList("lightGuids", iLightGuids);
             DA.GetData("lightLength", ref iLightLength);
             DA.GetData("lightWidth", ref iLightWidth);
             DA.GetData("intensity", ref iIntensity);
-            DA.GetData("color", ref iLightColor);
+            DA.GetDataList("color", iColor);
             DA.GetData("isRandomColor", ref iIsRandomColor);
             DA.GetData("rotateAngle", ref iRotateAngle);
             DA.GetData("spotLightAngle", ref iSpotLightAngle);
 
-            LightEditor lightEditor = new LightEditor(iRun, iLightGuids, iLightLength, iLightWidth, iIntensity, iLightColor, iIsRandomColor, iRotateAngle,iSpotLightAngle);
+            LightEditor lightEditor = new LightEditor(iRun, iLightGuids, iLightLength, iLightWidth, iIntensity, iColor, iIsRandomColor, iRotateAngle,iSpotLightAngle);
             lightEditor.EditLightAttributes();
 
             lightEditor.RotateLightObject();
@@ -342,6 +386,7 @@ namespace LightCreator
         {
             pManager.AddBooleanParameter("run", "run", "Button | 按钮", GH_ParamAccess.item, false);
             pManager.AddCurveParameter("crv", "crv", "Base Curves | 基准线", GH_ParamAccess.item);
+            
             pManager.AddIntegerParameter("lightMode", "lightMode", "光源模式 | Light Mode. 0 = Rectangular Light/矩形灯,1 = Point Light/点光源,2 = Spotlight/聚光灯", GH_ParamAccess.item, 0);
             if (pManager[2] is Param_Integer param_Integer)
             {
@@ -350,21 +395,30 @@ namespace LightCreator
                 param_Integer.AddNamedValue("SpotLight", 2);
             }
 
+            
+
             pManager.AddBooleanParameter("countMode", "countMode", "When countMode is on,the base curve is divided by count.Default mode is divide Length. | countMode开启后，曲线以数量分割,默认模式下以距离分割", GH_ParamAccess.item, false);
             pManager.AddIntegerParameter("divideCount", "divideCount", "When countMode is on,this parameter controls the count of divide points | countMode开启后，控制分割点数量", GH_ParamAccess.item, 5);
             pManager.AddNumberParameter("divideLength", "divideLength", "Divide Length | 分割点距离", GH_ParamAccess.item, 10);
-            pManager.AddNumberParameter("lightLength", "lightLength", "Length of Rectangular Light | 矩形灯长度", GH_ParamAccess.item, 3);
+            pManager.AddNumberParameter("lightLength", "lightLength", "Length of Rectangular Light.It also can change spotLight Length. | 矩形灯长度，也可以改变聚光灯的长度", GH_ParamAccess.item, 3);
             pManager.AddNumberParameter("lightWidth", "lightWidth", "Width of Rectangular Light | 矩形灯宽度", GH_ParamAccess.item, 0.2);
             pManager.AddNumberParameter("intensity", "intensity", "Light Intensity | 灯光亮度", GH_ParamAccess.item, 100);
-            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.item, Color.White);
+            pManager.AddColourParameter("color", "color", "Light Color | 灯光颜色", GH_ParamAccess.list, Color.White);
             pManager.AddNumberParameter("rectLightAngle", "rectLightAngle", "When switch to rectangular light mode,this parameter controls the rotate angle of rectangular light.|矩形灯模式下，控制矩形灯旋转角度", GH_ParamAccess.item, 30);
             pManager.AddNumberParameter("spotLightAngle", "spotLightAngle", "When switch to spot light mode,this parameter controls the beam angle of spotlight.NOTICE:PLEASE INPUT A NUMBER LARGER THAN 0 AND SMALLER THAN 90.|聚光灯模式下，控制聚光灯光束角.注意：请输入0-90之间的数值。", GH_ParamAccess.item, 30);
-            pManager.AddNumberParameter("lightRadius", "lightRadius", "When switch to Point Light Mode,this parameter controls the radius of point light preview sphere.When switch to spotlight Mode,this parameter controls the radius of spotlight.|点光源模式下，控制预览球体半径大小。聚光灯模式下，控制聚光灯半径大小。", GH_ParamAccess.item, 2);
+            pManager.AddNumberParameter("lightRadius", "lightRadius", "When switch to Point Light Mode,this parameter controls the radius of point light preview sphere.When switch to spotlight Mode,this parameter controls the radius of spotlight.|点光源模式下，控制预览球体半径大小。", GH_ParamAccess.item, 2);
         }
-
+        public override void AddedToDocument(GH_Document document)
+        {
+            base.AddedToDocument(document);
+            SolutionExpired += (sender, args) => {
+                ((GH_Component)sender).Params.Input[1].DataMapping = GH_DataMapping.Flatten;
+            };
+        }
         protected override void RegisterOutputParams(GH_Component.GH_OutputParamManager pManager)
         {
             pManager.AddCurveParameter("PreviewRect", "PreviewRect", "Rectangular lights' silhoutte preview | 矩形灯轮廓线预览", GH_ParamAccess.list);
+            pManager.AddLineParameter("PreviewRectDir", "PreviewRectDir", "Rectangular lights' direction preview | 矩形灯方向预览", GH_ParamAccess.list);
             pManager.AddMeshParameter("PreviewSphere", "PreviewSphere", "Point Light sphere preview mesh. | 点光源球体网格预览", GH_ParamAccess.list);
             pManager.AddMeshParameter("PreviewCone", "PreviewCone", "Spotlight Cone preview mesh. | 聚光灯圆锥体网格预览", GH_ParamAccess.list);
             pManager.AddPlaneParameter("Plane", "Plane", "Light's base plane. | 灯光布置平面", GH_ParamAccess.list);
@@ -381,7 +435,7 @@ namespace LightCreator
             double iLightLength = 3;
             double iLightWidth = 0.2;
             double iIntensity = 100;
-            Color iColor = Color.White;
+            List<Color> iColor = new List<Color>();
             double iRectLightAngle = 0;
             double iSpotLightAngle = 0;
 
@@ -394,7 +448,7 @@ namespace LightCreator
             DA.GetData("lightLength", ref iLightLength);
             DA.GetData("lightWidth", ref iLightWidth);
             DA.GetData("intensity", ref iIntensity);
-            DA.GetData("color", ref iColor);
+            DA.GetDataList("color", iColor);
             DA.GetData("rectLightAngle", ref iRectLightAngle);
             DA.GetData("spotLightAngle", ref iSpotLightAngle);
             DA.GetData("lightRadius", ref iLightRadius);
@@ -406,19 +460,21 @@ namespace LightCreator
                 RectLight rectLight = new RectLight(iRun, iCrv, iLightMode, iCountMode, iDivideCount, iDivideLength, iLightLength, iLightWidth, iIntensity, iColor, iRectLightAngle);
                 rectLight.CreateOnCrv_DivideCurve();
                 rectLight.CreateOnCrv_GetDividePoint();
+
                 DA.SetDataList("Plane", rectLight.CreateOnCrv_GetPlane());
+                if (rectLight.PlnList.Count != iColor.Count && iColor.Count > 1)
+                {
+                    this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Color's Count is not equal to Light's Count | 颜色数量和灯光数量不匹配");
+                }
                 rectLight.CreateOnCrv_DefineRectLightGeometry();
 
-                DA.SetDataList("PreviewRect", rectLight.Default_GetRectLightPreviewCrvs());
+                DA.SetDataList("PreviewRect", rectLight.CreateOnCrv_GetRectLightPreviewCrvs());
+                DA.SetDataList("PreviewRectDir", rectLight.CreateOnCrv_GetDirectionLine());
                 if (iRun == true)
                 {
                     rectLight.CreateRectLight();
                 }
             }
-
-
-
-
 
             if (iLightMode == 1)
             {
@@ -426,6 +482,10 @@ namespace LightCreator
                 pointLight.CreateOnCrv_DivideCurve();
                 pointLight.CreateOnCrv_GetDividePoint();
                 DA.SetDataList("Plane", pointLight.CreateOnCrv_GetPlane());
+                if (pointLight.ParamList.Count != iColor.Count && iColor.Count > 1)
+                {
+                    this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Color's Count is not equal to Light's Count | 颜色数量和灯光数量不匹配");
+                }
                 pointLight.CreateOnCrv_DefinePointLightGeometry();
 
                 DA.SetDataList("PreviewSphere", pointLight.CreateOnCrv_GetPointLightPreviewMesh());
@@ -436,15 +496,16 @@ namespace LightCreator
 
             }
 
-
-
-
             if (iLightMode == 2)
             {
                 SpotLight spotLight = new SpotLight(iRun, iCrv, iLightMode, iCountMode, iDivideCount, iDivideLength, iLightLength, iIntensity, iColor, iSpotLightAngle);
                 spotLight.CreateOnCrv_DivideCurve();
                 spotLight.CreateOnCrv_GetDividePoint();
                 DA.SetDataList("Plane", spotLight.CreateOnCrv_GetPlane());
+                if (spotLight.PlnList.Count != iColor.Count && iColor.Count > 1)
+                {
+                    this.AddRuntimeMessage(GH_RuntimeMessageLevel.Error, "Color's Count is not equal to Light's Count | 颜色数量和灯光数量不匹配");
+                }
                 spotLight.CreateOnCrv_DefineSpotLightGeometry();
 
                 DA.SetDataList("PreviewCone", spotLight.CreateOnCrv_GetSpotLightPreviewMesh());
@@ -454,10 +515,7 @@ namespace LightCreator
                 }
 
             }
-
         }
-
-
         protected override System.Drawing.Bitmap Icon => Properties.Resource.LightDividePts;
         public override Guid ComponentGuid => new Guid("776717cd-8636-4665-869b-6b25d04b6e7d");
     }

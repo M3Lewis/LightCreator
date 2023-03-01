@@ -1,4 +1,4 @@
-﻿using Eto.Drawing;
+﻿
 using Rhino;
 using Rhino.Geometry;
 using Rhino.Render.ChangeQueue;
@@ -23,14 +23,14 @@ namespace LightCreator.Class
         public double LightLength;
         public double LightWidth;
         public double LightIntensity;
-        public System.Drawing.Color LightColor;
+        public List<Color> LightColor;
         public double Angle;
 
 
-        public double LightPreviewObjectRadius;
+        public double LightRadius;
 
 
-        public PointLight(bool run, List<Point3d> location, double lightIntensity, System.Drawing.Color lightColor, double lightPreviewObjectRadius)
+        public PointLight(bool run, List<Point3d> location, double lightIntensity, List<Color> lightColor, double lightRadius)
         {
             Run = run;
 
@@ -43,7 +43,7 @@ namespace LightCreator.Class
                 Location = location;
             }
 
-            LightPreviewObjectRadius = lightPreviewObjectRadius;
+            LightRadius = lightRadius;
 
             if (lightIntensity < 0.1)
                 lightIntensity = 0.1;
@@ -52,20 +52,19 @@ namespace LightCreator.Class
             LightColor = lightColor;
         }
         //CreateOnCrv Overload
-        public PointLight(bool run, Curve baseCrv, int lightMode, bool countMode, double lightPreviewObjectRadius, int divideCount, double divideLength,
-            double lightLength, double lightWidth, double lightIntensity, System.Drawing.Color lightColor)
+        public PointLight(bool run, Curve baseCrv, int lightMode, bool countMode, double lightRadius, int divideCount, double divideLength,
+            double lightLength, double lightWidth, double lightIntensity, List<Color> lightColor)
         {
             Run = run;
             BaseCrv = baseCrv;
 
             LightMode = lightMode;
             CountMode = countMode;
-            LightPreviewObjectRadius = lightPreviewObjectRadius;
 
-            if (divideCount < 1)
-            { DivideCount = 1; }
-            else { DivideCount = divideCount; }
 
+            LightRadius = lightRadius;
+
+            DivideCount = divideCount;
             if (divideLength < 0.01)
             { DivideLength = 0.01; }
             else { DivideLength = divideLength; }
@@ -88,7 +87,7 @@ namespace LightCreator.Class
         double[] DivideParam = null;
         List<Curve> SplitedCrvs = new List<Curve>();
         List<Plane> PlnList = new List<Plane>();
-        List<double> ParamList = new List<double>();
+        public List<double> ParamList = new List<double>();
         List<Rhino.Geometry.Light> lights = new List<Rhino.Geometry.Light>();
 
         public void Default_DefinePointLightGeometry()
@@ -98,37 +97,39 @@ namespace LightCreator.Class
                 for (int i = 0; i < Location.Count; i++)
                 {
                     Rhino.Geometry.Light li = new Rhino.Geometry.Light();
-                    lights.Add(li);
 
-                    lights[i].LightStyle = LightStyle.WorldPoint;
-                    lights[i].Location = Location[i];
-                    lights[i].Intensity = LightIntensity / 100;
-                    lights[i].Diffuse = LightColor;
+
+                    li.LightStyle = LightStyle.WorldPoint;
+                    li.Location = Location[i];
+                    li.Intensity = LightIntensity / 100;
+                    if (LightColor.Count > 1)
+                    {
+                        li.Diffuse = LightColor[i];
+                    }
+                    else
+                    {
+                        li.Diffuse = LightColor[0];
+                    }
+                    lights.Add(li);
                 }
             }
         }
 
         public List<Curve> CreateOnCrv_DivideCurve()
         {
-            try
-            {
-                if (CountMode == true)
-                {
-                    DivideParam = BaseCrv.DivideByCount(DivideCount, true);
-                }
-                else
-                {
-                    DivideParam = BaseCrv.DivideByLength(DivideLength, false);
-                }
 
-                SplitedCrvs.AddRange(BaseCrv.Split(DivideParam));
-                ParamList.AddRange(DivideParam.ToList());
-
-            }
-            catch (Exception)
+            if (CountMode == true)
             {
-                Console.WriteLine("Whoa!");
+                DivideParam = BaseCrv.DivideByCount(DivideCount, true);
             }
+            else
+            {
+                DivideParam = BaseCrv.DivideByLength(DivideLength, true);
+            }
+
+            SplitedCrvs.AddRange(BaseCrv.Split(DivideParam));
+            ParamList.AddRange(DivideParam.ToList());
+
             return SplitedCrvs;
         }
         public List<Point3d> CreateOnCrv_GetDividePoint()
@@ -147,9 +148,13 @@ namespace LightCreator.Class
                 Plane tempPln;
                 BaseCrv.FrameAt(ParamList[i], out tempPln);
                 PlnList.Add(tempPln);
+                Vector3d fineTunedYAxis = Vector3d.CrossProduct(tempPln.XAxis, Plane.WorldXY.ZAxis);
+                tempPln = new Plane(tempPln.Origin, tempPln.XAxis, fineTunedYAxis);
             }
             return PlnList;
         }
+
+        
         public void CreateOnCrv_DefinePointLightGeometry()
         {
             for (int i = 0; i < ParamList.Count; i++)
@@ -158,11 +163,17 @@ namespace LightCreator.Class
                 lights.Add(li);
                 lights[i].LightStyle = LightStyle.WorldPoint;
                 lights[i].Intensity = LightIntensity / 100;
-                lights[i].Diffuse = LightColor;
+                if (LightColor.Count > 1)
+                {
+                    lights[i].Diffuse = LightColor[i];
+                }
+                else
+                {
+                    lights[i].Diffuse = LightColor[0];
+                }
                 lights[i].Location = PlnList[i].Origin;
             }
         }
-
 
         public List<Rhino.Geometry.Mesh> CreateOnCrv_GetPointLightPreviewMesh()
         {
@@ -170,7 +181,7 @@ namespace LightCreator.Class
 
             for (int i = 0; i < ParamList.Count; i++)
             {
-                Sphere sphere = new Sphere(PlnList[i].Origin, LightPreviewObjectRadius);
+                Sphere sphere = new Sphere(PlnList[i].Origin, LightRadius);
                 Brep b = sphere.ToBrep();
                 lightPreviewObjectMesh.AddRange(Rhino.Geometry.Mesh.CreateFromBrep(b, MeshingParameters.Minimal));
             }
@@ -182,7 +193,7 @@ namespace LightCreator.Class
 
             for (int i = 0; i < Location.Count; i++)
             {
-                Sphere sphere = new Sphere(Location[i], LightPreviewObjectRadius);
+                Sphere sphere = new Sphere(Location[i], LightRadius);
                 Brep b = sphere.ToBrep();
                 lightPreviewObjectMesh.AddRange(Rhino.Geometry.Mesh.CreateFromBrep(b, MeshingParameters.Minimal));
             }

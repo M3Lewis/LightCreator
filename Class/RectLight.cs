@@ -1,4 +1,4 @@
-﻿using Eto.Drawing;
+﻿
 using Eto.Forms;
 using Rhino;
 using Rhino.Geometry;
@@ -18,6 +18,7 @@ namespace LightCreator.Class
     {
         public bool Run;
         public Surface BaseSrf;
+        public List<Surface> BaseSrfList;
         public Curve BaseCrv;
         public int LightMode;
         public bool CountMode;
@@ -27,7 +28,7 @@ namespace LightCreator.Class
         public double LightWidth;
         public double LightOffsetDist;
         public double LightIntensity;
-        public System.Drawing.Color LightColor;
+        public List<Color> LightColor;
         public double RectLightAngle;
 
         //public double LightPreviewObjectLength;
@@ -35,7 +36,7 @@ namespace LightCreator.Class
 
 
         //CreateOnSrf Overload
-        public RectLight(bool run, Surface baseSrf, Curve baseCrv, double lightLength, double lightWidth, double lightOffsetDist, double lightIntensity, System.Drawing.Color lightColor)
+        public RectLight(bool run, Surface baseSrf, Curve baseCrv, double lightLength, double lightWidth, double lightOffsetDist, double lightIntensity, List<Color> lightColor)
         {
             Run = run;
             LightColor = lightColor;
@@ -72,11 +73,11 @@ namespace LightCreator.Class
         }
 
         //CreateFitSrf Overload
-        public RectLight(bool run, Surface baseSrf, double lightIntensity, System.Drawing.Color lightColor)
+        public RectLight(bool run, List<Surface> baseSrfList, double lightIntensity, List<Color> lightColor)
         {
             Run = run;
             LightColor = lightColor;
-            BaseSrf = baseSrf;
+            BaseSrfList = baseSrfList;
 
             if (lightIntensity < 0.1)
                 LightIntensity = 0.1;
@@ -84,7 +85,7 @@ namespace LightCreator.Class
         }
 
         //CreateOnCrv Overload
-        public RectLight(bool run, Curve baseCrv, int lightMode, bool countMode, int divideCount, double divideLength, double lightLength, double lightWidth, double lightIntensity, System.Drawing.Color lightColor, double rectLightAngle)
+        public RectLight(bool run, Curve baseCrv, int lightMode, bool countMode, int divideCount, double divideLength, double lightLength, double lightWidth, double lightIntensity, List<Color> lightColor, double rectLightAngle)
         {
             Run = run;
 
@@ -120,19 +121,14 @@ namespace LightCreator.Class
         //CreateOnCrv_Value
         double[] DivideParam = null;
         List<Curve> SplitedCrvs = new List<Curve>();
-        List<Plane> PlnList = new List<Plane>();
+        public List<Plane> PlnList = new List<Plane>();
         List<double> ParamList = new List<double>();
         List<Rhino.Geometry.Light> lights = new List<Rhino.Geometry.Light>();
 
         //CreateFitPlaneSrf_Value
-        double SrfWidth;
-        double SrfHeight;
-        Plane SrfPln; //平面曲面角点Plane
-
-        //CreateOnSrf_Value
-        List<Transform> Transform1 = new List<Transform>();
-        List<Transform> Transform2 = new List<Transform>();
-        List<Transform> Transform3 = new List<Transform>();
+        List<double> SrfWidth = new List<double>();
+        List<double> SrfHeight = new List<double>();
+        List<Plane> SrfPln = new List<Plane>(); //平面曲面角点Plane
 
 
         public List<Curve> CreateOnSrfAlongCrv_DivideCurve()
@@ -270,7 +266,6 @@ namespace LightCreator.Class
                 lights[i].Length = v2 * lightLen;
 
                 lights[i].Rotate(-angle, PlnList[i].YAxis, PlnList[i].Origin);
-                Transform1.Add(Transform.Rotation(-angle, PlnList[i].YAxis, PlnList[i].Origin));
 
                 ln1List.Add(new Line(PlnList[i].Origin, lights[i].Length));
                 ln2List.Add(new Line(PlnList[i].Origin, v1));
@@ -295,19 +290,16 @@ namespace LightCreator.Class
                 if (finalAngle > 180 && finalAngle < 360)
                 {
                     lights[i].Rotate(-angle2, finalPlane.ZAxis, PlnList[i].Origin);
-                    Transform2.Add(Transform.Rotation(-angle2, finalPlane.ZAxis, PlnList[i].Origin));
                 }
                 else
                 {
                     lights[i].Rotate(angle2, finalPlane.ZAxis, PlnList[i].Origin);
-                    Transform2.Add(Transform.Rotation(angle2, finalPlane.ZAxis, PlnList[i].Origin));
                 }
-                
+
                 //对齐到线中
                 Vector3d vw = -0.5 * lights[i].Width;
                 Transform tw = Transform.Translation(vw);
                 lights[i].Transform(tw);
-                Transform3.Add(tw);
 
                 //面法线偏移
                 Vector3d vo = LightOffsetDist * lights[i].Direction;
@@ -324,31 +316,33 @@ namespace LightCreator.Class
             //定义矩形灯颜色
             for (int i = 0; i < PlnList.Count; i++)
             {
-                lights[i].Diffuse = LightColor;
+                if (LightColor.Count > 1 || LightColor.Count == PlnList.Count || CountMode == true)
+                {
+                    lights[i].Diffuse = LightColor[i];
+                }
+                else
+                {
+                    lights[i].Diffuse = LightColor[0];
+                }
             }
 
         }
         public List<Curve> CreateOnCrv_DivideCurve()
         {
-            try
-            {
-                if (CountMode == true)
-                {
-                    DivideParam = BaseCrv.DivideByCount(DivideCount, true);
-                }
-                else
-                {
-                    DivideParam = BaseCrv.DivideByLength(DivideLength, false);
-                }
 
-                SplitedCrvs.AddRange(BaseCrv.Split(DivideParam));
-                ParamList.AddRange(DivideParam.ToList());
-
-            }
-            catch (Exception)
+            if (CountMode == true)
             {
-                Console.WriteLine("Whoa!");
+                DivideParam = BaseCrv.DivideByCount(DivideCount, true);
             }
+            else
+            {
+                DivideParam = BaseCrv.DivideByLength(DivideLength, true);
+            }
+
+            SplitedCrvs.AddRange(BaseCrv.Split(DivideParam));
+            ParamList.AddRange(DivideParam.ToList());
+
+
             return SplitedCrvs;
         }
         public List<Point3d> CreateOnCrv_GetDividePoint()
@@ -366,21 +360,14 @@ namespace LightCreator.Class
             {
                 Plane tempPln;
                 BaseCrv.FrameAt(ParamList[i], out tempPln);
-
-                //旋转平面
-                if (Vector3d.Multiply(tempPln.Normal, Plane.WorldXY.ZAxis) == 1)
-                {
-                    tempPln.Flip();
-                    tempPln.Rotate(RhinoMath.ToRadians(RectLightAngle + 90), tempPln.ZAxis, tempPln.Origin);
-                }
-                else
-                {
-                    tempPln.Rotate(RhinoMath.ToRadians(RectLightAngle), tempPln.ZAxis, tempPln.Origin);
-                }
+                Vector3d fineTunedYAxis = Vector3d.CrossProduct(tempPln.XAxis, Plane.WorldXY.ZAxis);
+                tempPln = new Plane(tempPln.Origin, tempPln.XAxis, fineTunedYAxis);
+                tempPln.Rotate(RhinoMath.ToRadians(RectLightAngle), tempPln.ZAxis);
                 PlnList.Add(tempPln);
             }
             return PlnList;
         }
+
         public void CreateOnCrv_DefineRectLightGeometry()
         {
             //生成灯光
@@ -390,27 +377,55 @@ namespace LightCreator.Class
                 lights.Add(li);
                 lights[i].LightStyle = LightStyle.WorldRectangular;
                 lights[i].Intensity = LightIntensity / 100;
-                lights[i].Diffuse = LightColor;
+                if (LightColor.Count > 1)
+                {
+                    lights[i].Diffuse = LightColor[i];
+                }
+                else
+                {
+                    lights[i].Diffuse = LightColor[0];
+                }
                 lights[i].Direction = PlnList[i].ZAxis;
                 lights[i].Location = PlnList[i].Origin;
                 lights[i].Length = PlnList[i].XAxis * LightLength;
                 lights[i].Width = PlnList[i].YAxis * LightWidth;
-            }
 
+                //对齐到线中
+                Vector3d vw = -0.5 * lights[i].Width;
+                Transform tw = Transform.Translation(vw);
+                lights[i].Transform(tw);
+            }
         }
 
-        /*
-         
-        */
-        public List<Rectangle3d> Default_GetRectLightPreviewCrvs()
+
+        public List<Rectangle3d> CreateOnCrv_GetRectLightPreviewCrvs()
         {
             List<Rectangle3d> RectLightPreviewCrvs = new List<Rectangle3d>();
 
             for (int i = 0; i < ParamList.Count; i++)
             {
-                RectLightPreviewCrvs.Add(new Rectangle3d(PlnList[i], LightLength, LightWidth));
+                RectLightPreviewCrvs.Add(new Rectangle3d(new Plane(lights[i].Location, lights[i].Length, lights[i].Width), LightLength, LightWidth));
             }
             return RectLightPreviewCrvs;
+        }
+        public List<Line> CreateOnCrv_GetDirectionLine()
+        {
+            List<Line> dirList = new List<Line>();
+            for (int i = 0; i < PlnList.Count; i++)
+            {
+                Vector3d vZ = PlnList[i].ZAxis;
+
+                Transform xForm1 = Transform.Translation(vZ*((LightLength+LightWidth)/1.2));
+                Transform xForm2 = Transform.Translation(0.5 * PlnList[i].XAxis*LightLength);
+                Point3d dirPtEnd = PlnList[i].Origin;
+                Point3d dirPtStart = PlnList[i].Origin;
+                dirPtEnd.Transform(xForm1);
+                dirPtEnd.Transform(xForm2);
+                dirPtStart.Transform(xForm2);
+                Line dirLine = new Line(dirPtStart, dirPtEnd);
+                dirList.Add(dirLine);
+            }
+            return dirList;
         }
 
         public List<Rectangle3d> CreateOnSrfAlongCrv_GetRectLightPreviewCrvs()
@@ -428,23 +443,26 @@ namespace LightCreator.Class
         public List<Rectangle3d> CreateFitPlaneSrf_GetRectLightPreviewCrvs()
         {
             List<Rectangle3d> RectLightPreviewCrvs = new List<Rectangle3d>();
-            RectLightPreviewCrvs.Add(new Rectangle3d(SrfPln, SrfWidth, SrfHeight));
-
+            for (int i = 0; i < BaseSrfList.Count; i++)
+            {
+                RectLightPreviewCrvs.Add(new Rectangle3d(SrfPln[i], SrfWidth[i], SrfHeight[i]));
+            }
             return RectLightPreviewCrvs;
         }
 
         public void CreateFitPlaneSrf_DefineGeometry()
         {
-            //添加灯光到List
-
-            Rhino.Geometry.Light light = new Rhino.Geometry.Light();
-            lights.Add(light);
-
-            foreach (Rhino.Geometry.Light li in lights)
+            for (int i = 0; i < BaseSrfList.Count; i++)
             {
-                li.LightStyle = LightStyle.WorldRectangular;
+                //添加灯光到List
+
+                Rhino.Geometry.Light light = new Rhino.Geometry.Light();
+                lights.Add(light);
+
+
+                lights[i].LightStyle = LightStyle.WorldRectangular;
                 //求面边缘
-                Brep b = BaseSrf.ToBrep();
+                Brep b = BaseSrfList[i].ToBrep();
                 Curve[] edges = b.DuplicateEdgeCurves(false);
 
                 //求角点
@@ -454,29 +472,40 @@ namespace LightCreator.Class
 
                 Point3d resultPts1 = ((Point3d)((IList)resultCorner[0])[0]);
                 Point3d resultPts2 = ((Point3d)((IList)resultCorner[0])[1]);
-                Point3d resultPts3 = ((Point3d)((IList)resultCorner[0])[2]);
                 Point3d resultPts4 = ((Point3d)((IList)resultCorner[0])[3]);
 
                 //定位
                 double u;
                 double v;
 
-                BaseSrf.ClosestPoint(resultPts2, out u, out v);
+                BaseSrfList[i].ClosestPoint(resultPts2, out u, out v);
 
-                Point3d cp = BaseSrf.PointAt(u, v);
-                Vector3d vDir = BaseSrf.NormalAt(u, v);
-                SrfPln = new Plane(cp, resultPts1, resultPts4);
+                Point3d cp = BaseSrfList[i].PointAt(u, v);
+                Vector3d vDir = BaseSrfList[i].NormalAt(u, v);
+                SrfPln.Add(new Plane(cp, resultPts1, resultPts4));
 
                 //赋予长宽
-                
-                BaseSrf.GetSurfaceSize(out SrfWidth, out SrfHeight);
-                li.Location = SrfPln.Origin;
-                li.Direction = -vDir;
-                li.Length = SrfPln.XAxis * SrfWidth;
-                li.Width = SrfPln.YAxis * SrfHeight;
-                li.Diffuse = LightColor;
-                li.Intensity = LightIntensity /100;
+                double tempSrfWidth;
+                double tempSrfHeight;
+                BaseSrfList[i].GetSurfaceSize(out tempSrfWidth, out tempSrfHeight);
+                SrfWidth.Add(tempSrfWidth);
+                SrfHeight.Add(tempSrfHeight);
+                lights[i].Location = SrfPln[i].Origin;
+                lights[i].Direction = -vDir;
+                lights[i].Length = SrfPln[i].XAxis * SrfWidth[i];
+                lights[i].Width = SrfPln[i].YAxis * SrfHeight[i];
+                if (LightColor.Count > 1)
+                {
+                    lights[i].Diffuse = LightColor[i];
+                }
+                else
+                {
+                    lights[i].Diffuse = LightColor[0];
+                }
+                lights[i].Intensity = LightIntensity / 100;
             }
+
+
         }
 
         public void CreateRectLight()
